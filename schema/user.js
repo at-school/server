@@ -1,4 +1,4 @@
-const UserModel = require("../models").UserModel;
+const { UserModel } = require("../models");
 const { gql } = require("apollo-server");
 const bcrypt = require("bcrypt");
 
@@ -20,6 +20,7 @@ const typeDef = gql`
       confirmedPassword: String!
       role: String!
     ): User
+    signin(email: String!, password: String!): Token
   }
 `;
 
@@ -27,13 +28,12 @@ const resolvers = {
   Mutation: {
     createUser: async (_, args) => {
       if (args.password !== args.confirmedPassword) {
-        return new ApolloError("Password must match confirmed password.", 400)
+        return new ApolloError("Password must match confirmed password.", 400);
       } else if (args.password.length < 8) {
         return new ApolloError("Password must be at least 8 characters.", 400);
       }
       try {
         const hash = await bcrypt.hash(args.password, 10);
-        console.log(UserModel)
         const user = await new UserModel({
           name: args.name,
           email: args.email,
