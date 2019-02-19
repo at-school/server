@@ -1,5 +1,8 @@
 const { UserModel, TokenModel } = require("../models");
-const { gql } = require("apollo-server");
+const {
+  ApolloError, 
+  gql, 
+} = require("apollo-server");
 const bcrypt = require("bcrypt");
 const sgMail = require("@sendgrid/mail");
 
@@ -29,6 +32,11 @@ const typeDef = gql`
 const resolvers = {
   Mutation: {
     createUser: async (_, args) => {
+      if (await UserModel.findOne({ email: args.email })) {
+        // if a user with this email already exists
+        return new ApolloError("This email has already been used.", 400);
+      }
+
       if (args.password !== args.confirmedPassword) {
         return new ApolloError("Password must match confirmed password.", 400);
       } else if (args.password.length < 8) {
