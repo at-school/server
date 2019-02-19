@@ -1,5 +1,8 @@
 const { UserModel } = require("../models");
-const { gql } = require("apollo-server");
+const {
+  ApolloError, 
+  gql, 
+} = require("apollo-server");
 const bcrypt = require("bcrypt");
 
 const typeDef = gql`
