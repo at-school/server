@@ -5,8 +5,10 @@ const sgMail = require("@sendgrid/mail");
 
 require("dotenv").config();
 
+const dbName = "atschool";
+
 mongoose.connect(
-  process.env.DATABASE_HOST || "mongodb://localhost:27017/atschool",
+  process.env.DATABASE_HOST + dbName || "mongodb://localhost:27017/" + dbName,
   {
     useNewUrlParser: true
   }
