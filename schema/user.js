@@ -24,7 +24,12 @@ const typeDef = gql`
       confirmedPassword: String!
       role: String!
     ): User
-    signin(email: String!, password: String!): Token
+
+    signin(
+      email: String!
+      password: String!
+    ): Token
+
     sendAccountConfirmationEmail(id: ID!): Boolean
   }
 `;
@@ -43,7 +48,7 @@ const resolvers = {
         return new ApolloError("Password must be at least 8 characters.", 400);
       }
       try {
-        const hash = await bcrypt.hash(args.password, 10);
+        const hash = await getPasswordHash(args.password);
         const user = await new UserModel({
           name: args.name,
           email: args.email,
@@ -54,6 +59,39 @@ const resolvers = {
         return saved_user;
       } catch (err) {
         throw new Error(err);
+      }
+    },
+    signin: async (_, args) => {
+      const user = await UserModel.findOne({ email: args.email });
+      if (!user) {
+        // if the user cannot be found
+        return new ApolloError("Your email or password is incorrect.", 400);
+      }
+
+      // compare the user input password
+      if (!await bcrypt.compare(args.password, user.password)) {
+        // password is incorrect
+        return new ApolloError("Your email or password is incorrect.", 400);
+      }
+
+      try {
+        const payload = {
+          "sub": "signin",
+          "name": user.name,
+          "admin": false
+        }
+  
+        // finally, return the tokens
+        const token = new TokenModel({
+          refreshToken: await TokenModel.generateRefreshToken(),
+          accessToken: await TokenModel.generateAccessToken(payload),
+          purpose: "ACCOUNT_ACCESS"
+        });
+        
+        const saved_token = await token.save();
+        return saved_token;
+      } catch (err) {
+        throw ApolloError("Error generating the token.");
       }
     },
     sendAccountConfirmationEmail: async (_, args) => {
@@ -83,6 +121,16 @@ const resolvers = {
     }
   }
 };
+
+/**
+ * Get the hash for the input password
+ * @param {*} password 
+ * @returns hash
+ */
+async function getPasswordHash(password) {
+  return bcrypt.hash(password, 10);
+}
+
 
 exports.resolvers = resolvers;
 exports.typeDef = typeDef;

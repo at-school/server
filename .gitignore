@@ -60,4 +60,6 @@ typings/
 # next.js build output
 .next
 
+# private keys and public keys
 *.key
+*.key.pub

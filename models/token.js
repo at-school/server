@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
+const randtoken = require("rand-token");
 
 const tokenSchema = new mongoose.Schema({
   refreshToken: {
