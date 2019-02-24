@@ -23,7 +23,8 @@ const resolvers = {
       return await UserModel.findById(args.id);
     },
     async users(_, args, context) {
-      if (!context.user) return [];
+      // check user's access level
+      if (!context.user) throw new AuthenticationError('Access Denied');
       return await UserModel.find(args);
     },
     async token(_, args) {
@@ -43,21 +44,22 @@ const schema = makeExecutableSchema({
 const context = async ({ req }) => {
   // get the user token from the headers
   const token = req.headers.authorization || '';
-  if (!token) throw new AuthenticationError('Access Denied, you must log in.'); 
+  if (token == '') return { user: null }; 
   
   try {
     // decode the jwt token, and get the user id
-    const userId = await TokenModel.verifyAccessToken(token).id;  
+    const tokenInfo = await TokenModel.verifyAccessToken(token);  
+    const userId = tokenInfo.id;
     // try to retrieve a user with the id
     const user = await UserModel.findById(userId);
  
     // we could also check user roles/permissions here
-    if (!user) throw new AuthenticationError('Access Denied, you must log in.'); 
+    if (!user) throw new AuthenticationError('Access Denied'); 
  
     // add the user to the context
     return { user };
   } catch (error) {
-    throw new AuthenticationError('Access Denied, you must log in.');  
+    throw error;  
   }
  }
 
