@@ -1,6 +1,6 @@
 const { ApolloServer } = require("apollo-server");
 const mongoose = require("mongoose");
-const schema = require("./schema");
+const { schema, context } = require("./schema");
 const sgMail = require("@sendgrid/mail");
 
 require("dotenv").config();
@@ -19,7 +19,10 @@ sgMail.setApiKey(process.env.SENDGRID_APIKEY);
 var os = require("os");
 console.log(os.hostname())
 
-const server = new ApolloServer({ schema: schema });
+const server = new ApolloServer({
+  schema: schema,
+  context: context
+});
 
 server.listen({ port: process.env.PORT || 4000 }).then(({ url }) => {
   console.log(`Server ready at ${url}`);
