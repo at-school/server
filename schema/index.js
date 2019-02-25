@@ -1,5 +1,4 @@
-const { makeExecutableSchema } = require("apollo-server");
-const { gql } = require("apollo-server");
+const { makeExecutableSchema, gql, AuthenticationError } = require("apollo-server");
 const { typeDef: User, resolvers: userResolvers } = require("./user.js");
 const { typeDef: Token, resolvers: tokenResolvers } = require("./token.js");
 const { UserModel, TokenModel } = require("../models");
@@ -23,7 +22,9 @@ const resolvers = {
     async user(_, args) {
       return await UserModel.findById(args.id);
     },
-    async users(_, args) {
+    async users(_, args, context) {
+      // check user's access level
+      if (!context.user) throw new AuthenticationError('Access Denied');
       return await UserModel.find(args);
     },
     async token(_, args) {
@@ -40,4 +41,27 @@ const schema = makeExecutableSchema({
   resolvers: [resolvers, userResolvers, tokenResolvers]
 });
 
-module.exports = schema;
+const context = async ({ req }) => {
+  // get the user token from the headers
+  const token = req.headers.authorization || '';
+  if (token == '') return { user: null }; 
+  
+  try {
+    // decode the jwt token, and get the user id
+    const tokenInfo = await TokenModel.verifyAccessToken(token);  
+    const userId = tokenInfo.id;
+    // try to retrieve a user with the id
+    const user = await UserModel.findById(userId);
+ 
+    // we could also check user roles/permissions here
+    if (!user) throw new AuthenticationError('Access Denied'); 
+ 
+    // add the user to the context
+    return { user };
+  } catch (error) {
+    throw error;  
+  }
+ }
+
+exports.schema = schema;
+exports.context = context;

@@ -75,16 +75,13 @@ const resolvers = {
       }
 
       try {
-        const payload = {
-          "sub": "signin",
-          "name": user.name,
-          "admin": false
-        }
-  
         // finally, return the tokens
         const token = new TokenModel({
           refreshToken: await TokenModel.generateRefreshToken(),
-          accessToken: await TokenModel.generateAccessToken(payload),
+          accessToken: await TokenModel.generateAccessToken({
+            id: user.id,
+            purpose: "ACCOUNT_ACCESS"
+          }),
           purpose: "ACCOUNT_ACCESS"
         });
         
