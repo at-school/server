@@ -5,6 +5,15 @@ const {
 } = require("apollo-server");
 const bcrypt = require("bcrypt");
 const sgMail = require("@sendgrid/mail");
+const { __ } = require("i18n");
+
+const errorMessages = {
+  'email_used': __("This email has already been used."),
+  'pw_not_match': __("Password must match confirmed password."),
+  'pw_8_char': __("Password must be at least 8 characters."),
+  'email_pw_incorrect': __("Your email or password is incorrect."),
+  'token_error': __("Error generating the token.")
+}
 
 const typeDef = gql`
   type User {
@@ -39,13 +48,13 @@ const resolvers = {
     createUser: async (_, args) => {
       if (await UserModel.findOne({ email: args.email })) {
         // if a user with this email already exists
-        return new ApolloError("This email has already been used.", 400);
+        return new ApolloError(errorMessages.email_used, 400);
       }
 
       if (args.password !== args.confirmedPassword) {
-        return new ApolloError("Password must match confirmed password.", 400);
+        return new ApolloError(errorMessages.pw_not_match, 400);
       } else if (args.password.length < 8) {
-        return new ApolloError("Password must be at least 8 characters.", 400);
+        return new ApolloError(errorMessages.pw_8_char, 400);
       }
       try {
         const hash = await getPasswordHash(args.password);
@@ -65,13 +74,13 @@ const resolvers = {
       const user = await UserModel.findOne({ email: args.email });
       if (!user) {
         // if the user cannot be found
-        return new ApolloError("Your email or password is incorrect.", 400);
+        return new ApolloError(errorMessages.email_pw_incorrect, 400);
       }
 
       // compare the user input password
       if (!await bcrypt.compare(args.password, user.password)) {
         // password is incorrect
-        return new ApolloError("Your email or password is incorrect.", 400);
+        return new ApolloError(errorMessages.email_pw_incorrect, 400);
       }
 
       try {
@@ -88,7 +97,7 @@ const resolvers = {
         const saved_token = await token.save();
         return saved_token;
       } catch (err) {
-        throw ApolloError("Error generating the token.");
+        throw ApolloError(errorMessages.token_error);
       }
     },
     sendAccountConfirmationEmail: async (_, args) => {

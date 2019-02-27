@@ -2,6 +2,11 @@ const { makeExecutableSchema, gql, AuthenticationError } = require("apollo-serve
 const { typeDef: User, resolvers: userResolvers } = require("./user.js");
 const { typeDef: Token, resolvers: tokenResolvers } = require("./token.js");
 const { UserModel, TokenModel } = require("../models");
+const { __ } = require("i18n");
+
+const errorMessages = {
+  'access_denied': __("Access Denied")
+}
 
 const Query = gql`
   type Query {
@@ -24,7 +29,7 @@ const resolvers = {
     },
     async users(_, args, context) {
       // check user's access level
-      if (!context.user) throw new AuthenticationError('Access Denied');
+      if (!context.user) throw new AuthenticationError(errorMessages.access_denied);
       return await UserModel.find(args);
     },
     async token(_, args) {
@@ -54,7 +59,7 @@ const context = async ({ req }) => {
     const user = await UserModel.findById(userId);
  
     // we could also check user roles/permissions here
-    if (!user) throw new AuthenticationError('Access Denied'); 
+    if (!user) throw new AuthenticationError(errorMessages.access_denied); 
  
     // add the user to the context
     return { user };
