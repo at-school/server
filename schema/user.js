@@ -5,14 +5,13 @@ const {
 } = require("apollo-server");
 const bcrypt = require("bcrypt");
 const sgMail = require("@sendgrid/mail");
-const { __ } = require("i18n");
 
 const errorMessages = {
-  'email_used': __("This email has already been used."),
-  'pw_not_match': __("Password must match confirmed password."),
-  'pw_8_char': __("Password must be at least 8 characters."),
-  'email_pw_incorrect': __("Your email or password is incorrect."),
-  'token_error': __("Error generating the token.")
+  'email_used': "This email has already been used.",
+  'pw_not_match': "Password must match confirmed password.",
+  'pw_8_char': "Password must be at least 8 characters.",
+  'email_pw_incorrect': "Your email or password is incorrect.",
+  'token_error': "Error generating the token."
 }
 
 const typeDef = gql`

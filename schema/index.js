@@ -2,10 +2,9 @@ const { makeExecutableSchema, gql, AuthenticationError } = require("apollo-serve
 const { typeDef: User, resolvers: userResolvers } = require("./user.js");
 const { typeDef: Token, resolvers: tokenResolvers } = require("./token.js");
 const { UserModel, TokenModel } = require("../models");
-const { __ } = require("i18n");
 
 const errorMessages = {
-  'access_denied': __("Access Denied")
+  'access_denied': "Access Denied"
 }
 
 const Query = gql`
