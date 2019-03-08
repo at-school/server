@@ -1,0 +1,9 @@
+{
+	"stupid shit": "stupid shit",
+	"This email has already been used.": "This email has already been used.",
+	"Password must match confirmed password.": "Password must match confirmed password.",
+	"Password must be at least 8 characters.": "Password must be at least 8 characters.",
+	"Your email or password is incorrect.": "Your email or password is incorrect.",
+	"Error generating the token.": "Error generating the token.",
+	"Access Denied": "Access Denied"
+}

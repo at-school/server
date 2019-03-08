@@ -1,3 +1,11 @@
+const { configure } = require("i18n");
+const path = require("path");
+
+configure({
+  locales: ['en-AU', 'zh-Hans-CN'],
+  directory: path.join(__dirname, "./locales")
+});
+
 const { ApolloServer } = require("apollo-server");
 const mongoose = require("mongoose");
 const { schema, context } = require("./schema");
